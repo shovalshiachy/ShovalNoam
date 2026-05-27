@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Makeup Sales Analytics Dashboard</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #fff1f8, #f2e7ff, #e6f7ff);
+      color: #2d2238;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    header {
+      background: linear-gradient(135deg, #ff6fb1, #9b5de5, #00bbf9);
+      color: white;
+      padding: 70px 10%;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: "💄 📊 ✨ 🛍️ 💅";
+      position: absolute;
+      font-size: 4rem;
+      opacity: 0.16;
+      top: 20px;
+      left: 5%;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    header h1 {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      animation: fadeDown 1s ease;
+    }
+
+    header p {
+      font-size: 1.2rem;
+      max-width: 800px;
+      margin: auto;
+      line-height: 1.7;
+      animation: fadeUp 1.2s ease;
+    }
+
+    nav {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      padding: 18px 10%;
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    nav a {
+      color: #6b2dbd;
+      text-decoration: none;
+      font-weight: 700;
+      transition: 0.3s;
+    }
+
+    nav a:hover {
+      color: #ff4fa3;
+      transform: translateY(-2px);
+    }
+
+    section {
+      padding: 70px 10%;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .section-title h2 {
+      font-size: 2.2rem;
+      color: #5b2a86;
+      margin-bottom: 10px;
+    }
+
+    .section-title p {
+      color: #66566f;
+      font-size: 1.05rem;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 25px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.82);
+      border-radius: 24px;
+      padding: 28px;
+      text-align: center;
+      box-shadow: 0 14px 35px rgba(130, 70, 170, 0.14);
+      transition: 0.35s;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+    }
+
+    .card:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0 20px 45px rgba(130, 70, 170, 0.22);
+    }
+
+    .card .emoji {
+      font-size: 2.3rem;
+      margin-bottom: 12px;
+    }
+
+    .card h3 {
+      color: #7b2cbf;
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      color: #66566f;
+      line-height: 1.5;
+    }
+
+    .dashboard-wrapper {
+      background: white;
+      border-radius: 28px;
+      padding: 25px;
+      box-shadow: 0 20px 45px rgba(65, 40, 90, 0.18);
+      border: 3px solid #ffd6ec;
+      animation: fadeUp 1s ease;
+    }
+
+    .dashboard-note {
+      background: linear-gradient(135deg, #ffe0f0, #eee0ff);
+      padding: 18px 22px;
+      border-radius: 18px;
+      margin-bottom: 22px;
+      color: #5b2a86;
+      font-weight: 600;
+      line-height: 1.6;
+    }
+
+    .tableauPlaceholder,
+    .tableauViz {
+      width: 100% !important;
+      min-height: 760px;
+      border-radius: 18px;
+    }
+
+    .insights {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 24px;
+    }
+
+    .insight-box {
+      background: linear-gradient(135deg, #ffffff, #fff5fb);
+      border-left: 7px solid #ff6fb1;
+      padding: 24px;
+      border-radius: 18px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      transition: 0.3s;
+    }
+
+    .insight-box:hover {
+      transform: translateX(7px);
+    }
+
+    .insight-box h3 {
+      color: #6b2dbd;
+      margin-bottom: 10px;
+    }
+
+    .cta {
+      text-align: center;
+      background: linear-gradient(135deg, #9b5de5, #f15bb5, #fee440);
+      color: white;
+      border-radius: 30px;
+      padding: 55px 25px;
+      box-shadow: 0 18px 45px rgba(155, 93, 229, 0.28);
+    }
+
+    .cta h2 {
+      font-size: 2.3rem;
+      margin-bottom: 15px;
+    }
+
+    .cta p {
+      max-width: 720px;
+      margin: 0 auto 25px;
+      line-height: 1.7;
+      font-size: 1.1rem;
+    }
+
+    .btn {
+      display: inline-block;
+      background: white;
+      color: #7b2cbf;
+      padding: 14px 28px;
+      border-radius: 40px;
+      text-decoration: none;
+      font-weight: 800;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      transform: translateY(-5px);
+      background: #fff1f8;
+    }
+
+    footer {
+      text-align: center;
+      padding: 28px;
+      color: #66566f;
+      background: rgba(255, 255, 255, 0.75);
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-25px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(18px); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(35px);
+      transition: 0.8s ease;
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 2.2rem;
+      }
+
+      nav {
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+
+      section {
+        padding: 50px 6%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Makeup Sales Analytics 💄📊</h1>
+    <p>
+      A fun, interactive and professional data analytics website presenting beauty product sales insights through an embedded Tableau dashboard.
+    </p>
+  </header>
+
+  <nav>
+    <a href="#overview">Overview</a>
+    <a href="#dashboard">Tableau Dashboard</a>
+    <a href="#insights">Insights</a>
+    <a href="#summary">Summary</a>
+  </nav>
+
+  <section id="overview" class="reveal">
+    <div class="section-title">
+      <h2>Business Overview ✨</h2>
+      <p>Analyzing sales, profitability, product categories and distribution channels for a fictional makeup business.</p>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="emoji">💰</div>
+        <h3>Sales Revenue</h3>
+        <p>Track total revenue by product category, sales year and business area.</p>
+      </div>
+
+      <div class="card">
+        <div class="emoji">🛒</div>
+        <h3>Distribution Channels</h3>
+        <p>Compare performance across website, retail stores, marketplace and social commerce.</p>
+      </div>
+
+      <div class="card">
+        <div class="emoji">🌍</div>
+        <h3>Sales Regions</h3>
+        <p>Explore which areas generate the highest sales volume and customer activity.</p>
+      </div>
+
+      <div class="card">
+        <div class="emoji">⭐</div>
+        <h3>Product Quality</h3>
+        <p>Review product quality scores and customer ratings to identify strong performers.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="dashboard" class="reveal">
+    <div class="section-title">
+      <h2>Interactive Tableau Dashboard 🚀</h2>
+      <p>The Tableau dashboard is the main part of this website — this is where the data becomes visual and interactive.</p>
+    </div>
+
+    <div class="dashboard-wrapper">
+      <div class="dashboard-note">
+        📌 Important: replace the Tableau link below with your own Tableau Public embed link. The dashboard should remain central and highly visible because it is the main analytical product of the project.
+      </div>
+
+      <!--
+        TABLEAU EMBED INSTRUCTIONS:
+        1. Publish your dashboard to Tableau Public.
+        2. Click Share.
+        3. Copy the Embed Code.
+        4. Replace the placeholder block below with your real Tableau embed code.
+      -->
+
+      <div class="tableauPlaceholder" id="vizContainer">
+        <noscript>
+          <a href="#">
+            <img alt="Tableau Dashboard" src="https://public.tableau.com/static/images/placeholder.png" style="border: none" />
+          </a>
+        </noscript>
+        <object class="tableauViz">
+          <param name="host_url" value="https%3A%2F%2Fpublic.tableau.com%2F" />
+          <param name="embed_code_version" value="3" />
+          <param name="site_root" value="" />
+          <param name="name" value="-_17798804273010/Dashboard1" />
+          <param name="tabs" value="no" />
+          <param name="toolbar" value="yes" />
+          <param name="animate_transition" value="yes" />
+          <param name="display_static_image" value="yes" />
+          <param name="display_spinner" value="yes" />
+          <param name="display_overlay" value="yes" />
+          <param name="display_count" value="yes" />
+          <param name="language" value="en-US" />
+        </object>
+      </div>
+    </div>
+  </section>
+
+  <section id="insights" class="reveal">
+    <div class="section-title">
+      <h2>Key Analytical Insights 🔍</h2>
+      <p>Examples of insights that can be explained after reviewing the Tableau dashboard.</p>
+    </div>
+
+    <div class="insights">
+      <div class="insight-box">
+        <h3>Top Product Categories 💄</h3>
+        <p>Identify which makeup categories generate the highest total revenue and deserve stronger marketing focus.</p>
+      </div>
+
+      <div class="insight-box">
+        <h3>Sales Trends Over Time 📈</h3>
+        <p>Analyze yearly changes in sales performance and detect growth or decline patterns.</p>
+      </div>
+
+      <div class="insight-box">
+        <h3>Regional Performance 🌎</h3>
+        <p>Compare sales across regions to understand where demand is strongest.</p>
+      </div>
+
+      <div class="insight-box">
+        <h3>Profitability by Channel 🧾</h3>
+        <p>Evaluate which distribution channels provide the best average profit margin.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="summary" class="reveal">
+    <div class="cta">
+      <h2>Data + Beauty = Smart Decisions 💅✨</h2>
+      <p>
+        This website presents a clean analytics story: from raw makeup sales data to interactive business insights using Tableau Public.
+      </p>
+      <a class="btn" href="#dashboard">View Dashboard 📊</a>
+    </div>
+  </section>
+
+  <footer>
+    <p>Created for a Data Visualization Practice Project | Makeup Sales Analytics 💖</p>
+  </footer>
+
+  <script type="text/javascript">
+    // Tableau embed loader
+    const divElement = document.getElementById("vizContainer");
+    const vizElement = divElement.getElementsByTagName("object")[0];
+
+    if (divElement.offsetWidth > 800) {
+      vizElement.style.width = "100%";
+      vizElement.style.height = "760px";
+    } else if (divElement.offsetWidth > 500) {
+      vizElement.style.width = "100%";
+      vizElement.style.height = "700px";
+    } else {
+      vizElement.style.width = "100%";
+      vizElement.style.height = "620px";
+    }
+
+    const scriptElement = document.createElement("script");
+    scriptElement.src = "https://public.tableau.com/javascripts/api/viz_v1.js";
+    vizElement.parentNode.insertBefore(scriptElement, vizElement);
+
+    // Smooth reveal animation
+    const revealElements = document.querySelectorAll(".reveal");
+
+    function revealOnScroll() {
+      revealElements.forEach((element) => {
+        const windowHeight = window.innerHeight;
+        const elementTop = element.getBoundingClientRect().top;
+        const revealPoint = 120;
+
+        if (elementTop < windowHeight - revealPoint) {
+          element.classList.add("active");
+        }
+      });
+    }
+
+    window.addEventListener("scroll", revealOnScroll);
+    revealOnScroll();
+  </script>
+</body>
+</html>
